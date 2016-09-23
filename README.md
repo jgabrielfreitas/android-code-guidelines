@@ -213,7 +213,7 @@ if (x == 1) {
 }
 ```
 
-### 2.2.5 Sobre user `{ }`
+### 2.2.5 Sobre usar `{ }`
 
 > Lembre-se sempre de verificar se há espaços entre os parenteses, chaves e comandos
 
@@ -376,47 +376,47 @@ public class MainActivity extends Activity {
 }
 ```
 
-### 2.2.11 Parameter ordering in methods
+### 2.2.11 Ordenação de parâmetros em métodos
 
-When programming for Android, it is quite common to define methods that take a `Context`. If you are writing a method like this, then the __Context__ must be the __first__ parameter.
+Ao programar para o Android, é bastante comum para definir os métodos que levem um `Context` como parâmetro. Se você estiver escrevendo um método como este, o __Context__ deve ser o __primeiro__ parâmetro.
 
-The opposite case are __callback__ interfaces that should always be the __last__ parameter.
+No caso de __callbacks__, devemos utilizar o oposto, sendo elas o __último__ parâmetro.
 
-Examples:
+Exemplos:
 
 ```java
-// Context always goes first
+// Context em primeiro
 public User loadUser(Context context, int userId);
 
-// Callbacks always go last
+// Callbacks como último
 public void loadUserAsync(Context context, int userId, UserCallback callback);
 ```
 
-### 2.2.13 String constants, naming, and values
+### 2.2.13 Strings, nomes e valores
 
-Many elements of the Android SDK such as `SharedPreferences`, `Bundle`, or `Intent` use a key-value pair approach so it's very likely that even for a small app you end up having to write a lot of String constants.
+Muito dos elementos da SDK do Android como `SharedPreferences`, `Bundle`, ou `Intent` usam uma abordagem de chave-valor, por isso é muito provável que, mesmo para um pequeno aplicativo que você acaba tendo que escrever um monte de constantes String.
 
-When using one of these components, you __must__ define the keys as a `static final` fields and they should be prefixed as indicated below.
+Ao usar um desses componentes, é __necessário definir__ as chaves como um campos `static final` e devem conter o prefixo, conforme indicado abaixo.
 
-| Element            | Field Name Prefix |
-| -----------------  | ----------------- |
-| SharedPreferences  | `PREF_`             |
+| Elemento           | Prefixo             |
+| -----------------  | ------------------- |
+| SharedPreferences  | `SHARED_`           |
 | Bundle             | `BUNDLE_`           |
 | Fragment Arguments | `ARGUMENT_`         |
 | Intent Extra       | `EXTRA_`            |
 | Intent Action      | `ACTION_`           |
 
-Note that the arguments of a Fragment - `Fragment.getArguments()` - are also a Bundle. However, because this is a quite common use of Bundles, we define a different prefix for them.
+Note que os argumentos de um `Fragment` - `Fragment.getArguments ()` - também são um Bundle. No entanto, porque este é um uso bastante comum de Bundles, nós definimos um prefixo diferente para eles.
 
-Example:
+Exemplo:
 
 ```java
-// Note the value of the field is the same as the name to avoid duplication issues
-static final String PREF_EMAIL = "PREF_EMAIL";
-static final String BUNDLE_AGE = "BUNDLE_AGE";
+// Note que o valor do campo é o mesmo que o nome para evitar problemas de duplicação
+static final String SHARED_EMAIL = "SHARED_EMAIL";
+static final String BUNDLE_AGE   = "BUNDLE_AGE";
 static final String ARGUMENT_USER_ID = "ARGUMENT_USER_ID";
 
-// Intent-related items use full package name as value
+// itens relacionados com Intent devem utilizar nome completo do pacote como valor
 static final String EXTRA_SURNAME = "com.myapp.extras.EXTRA_SURNAME";
 static final String ACTION_OPEN_USER = "com.myapp.action.ACTION_OPEN_USER";
 ```
