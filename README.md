@@ -421,13 +421,13 @@ static final String EXTRA_SURNAME = "com.myapp.extras.EXTRA_SURNAME";
 static final String ACTION_OPEN_USER = "com.myapp.action.ACTION_OPEN_USER";
 ```
 
-### 2.2.14 Arguments in Fragments and Activities
+### 2.2.14 Argumentos em Fragments e Activities
 
-When data is passed into an `Activity `or `Fragment` via an `Intent` or a `Bundle`, the keys for the different values __must__ follow the rules described in the section above.
+Quando os dados são passados ​​para um `Activity` or `Fragment` através de uma `Intent` ou um `Bundle`, as chaves para os diferentes valores __devem__ seguir as regras descritas na seção acima.
 
-When an `Activity` or `Fragment` expects arguments, it should provide a `public static` method that facilitates the creation of the relevant `Intent` or `Fragment`.
+Quando uma `Activity` ou `Fragment` esperam argumentos, deve-se fornecer um método `public static` que facilita a criação da `Intent` ou `Fragment`.
 
-In the case of Activities the method is usually called `getStartIntent()`:
+No caso de Activities, o método se chamará `getStartIntent()`:
 
 ```java
 public static Intent getStartIntent(Context context, User user) {
@@ -437,7 +437,7 @@ public static Intent getStartIntent(Context context, User user) {
 }
 ```
 
-For Fragments it is named `newInstance()` and handles the creation of the Fragment with the right arguments:
+Para `Fragments` é denominada `newInstance()` e processa a criação da `Fragment` com os argumentos certos:
 
 ```java
 public static UserFragment newInstance(User user) {
@@ -449,47 +449,51 @@ public static UserFragment newInstance(User user) {
 }
 ```
 
-__Note 1__: These methods should go at the top of the class before `onCreate()`.
+__Nota 1__: Estes métodos devem estar no topo da classe, antes do `onCreate()`.
 
-__Note 2__: If we provide the methods described above, the keys for extras and arguments should be `private` because there is not need for them to be exposed outside the class.
+__Nota 2__: Se nós fornecemos os métodos descritos acima, as chaves para extras e argumentos devem ser `private` porque não há necessidade de que eles sejam expostos para outras classes.
 
-### 2.2.15 Line length limit
+### 2.2.15 Tamanho máximo da linha
 
-Code lines should not exceed __100 characters__. If the line is longer than this limit there are usually two options to reduce its length:
+As linhas não podem exceder os __100 caracteres__.
+Se o seu código exceder esse limite por algum motivo, você terá duas opções:
 
-* Extract a local variable or method (preferable).
-* Apply line-wrapping to divide a single line into multiple ones.
+* Extrair para uma variável local ou método (recomendado);
+* Aplicar quebras de linhas para dividir uma única linha em várias
 
-There are two __exceptions__ where it is possible to have lines longer than 100:
+Existem duas __exceções__ quando a sua linha pode exceder o limite de caracteres:
 
-* Lines that are not possible to split, e.g. long URLs in comments.
-* `package` and `import` statements.
+* Linhas que não possíveis de quebrar, ex. uma URL
+* Padrão de `package` e `import`
 
-#### 2.2.15.1 Line-wrapping strategies
+#### 2.2.15.1 Quebra de linha
 
-There isn't an exact formula that explains how to line-wrap and quite often different solutions are valid. However there are a few rules that can be applied to common cases.
+Não existe uma fórmula exata que explica como quebra de linha e muitas vezes as soluções diferentes são válidas.
+No entanto, existem algumas regras que podem ser aplicadas a casos comuns.
 
-__Break at operators__
+__Operadores__
 
-When the line is broken at an operator, the break comes __before__ the operator. For example:
+Quando a linha é quebra um operador, a linha vem __antes__ do operador.
+Ex:
 
 ```java
 int longName = anotherVeryLongVariable + anEvenLongerOne - thisRidiculousLongOne
         + theFinalOne;
 ```
 
-__Assignment Operator Exception__
-
-An exception to the `break at operators` rule is the assignment operator `=`, where the line break should happen __after__ the operator.
-
+Se possível, quebre a operação em partes.
+Ex:
 ```java
-int longName =
-        anotherVeryLongVariable + anEvenLongerOne - thisRidiculousLongOne + theFinalOne;
+int foo = anotherVeryLongVariable + anEvenLongerOne;
+int bar = foo - thisRidiculousLongOne;
+int longName =  bar + theFinalOne;
 ```
+> Desta forma, você ganha uma certa precisão no debug, caso tenha problemas com o algoritmo.
 
-__Method chain case__
+__Em caso de métodos__
 
-When multiple methods are chained in the same line - for example when using Builders - every call to a method should go in its own line, breaking the line before the `.`
+
+Quando múltiplos métodos estão encadeados na mesma linha (ex. o padrão [Builder](https://pt.wikipedia.org/wiki/Builder) ou [FluentInterface](https://en.wikipedia.org/wiki/Fluent_interface)), toda chamada do método deve estar na mesma linha, separada por `.`
 
 ```java
 Picasso.with(context).load("http://ribot.co.uk/images/sexyjoe.jpg").into(imageView);
@@ -497,47 +501,27 @@ Picasso.with(context).load("http://ribot.co.uk/images/sexyjoe.jpg").into(imageVi
 
 ```java
 Picasso.with(context)
-        .load("http://ribot.co.uk/images/sexyjoe.jpg")
-        .into(imageView);
+       .load("http://ribot.co.uk/images/sexyjoe.jpg")
+       .into(imageView);
 ```
+> De preferência com todos os `.` alinhados.
 
-__Long parameters case__
+__Parâmetros longos__
 
-When a method has many parameters or its parameters are very long, we should break the line after every comma `,`
+Quando os métodos possuem vários parâmetros ou os mesmos são muito longos, você deve quebrar as linhas ao usar `,`:
 
 ```java
-loadPicture(context, "http://ribot.co.uk/images/sexyjoe.jpg", mImageViewProfilePicture, clickListener, "Title of the picture");
+loadPicture(context, "http://ribot.co.uk/images/sexyjoe.jpg", imageViewProfilePicture, clickListener, "Title of the picture");
 ```
 
 ```java
 loadPicture(context,
-        "http://ribot.co.uk/images/sexyjoe.jpg",
-        mImageViewProfilePicture,
-        clickListener,
-        "Title of the picture");
+            "http://ribot.co.uk/images/sexyjoe.jpg",
+            imageViewProfilePicture,
+            clickListener,
+            "Title of the picture");
 ```
-
-### 2.2.16 RxJava chains styling
-
-Rx chains of operators require line-wrapping. Every operator must go in a new line and the line should be broken before the `.`
-
-```java
-public Observable<Location> syncLocations() {
-    return mDatabaseHelper.getAllLocations()
-            .concatMap(new Func1<Location, Observable<? extends Location>>() {
-                @Override
-                 public Observable<? extends Location> call(Location location) {
-                     return mRetrofitService.getLocation(location.id);
-                 }
-            })
-            .retry(new Func2<Integer, Throwable, Boolean>() {
-                 @Override
-                 public Boolean call(Integer numRetries, Throwable throwable) {
-                     return throwable instanceof RetrofitError;
-                 }
-            });
-}
-```
+> De preferência alinha os parâmetros também
 
 ## 2.3 XML style rules
 
