@@ -79,17 +79,19 @@ Similar aos arquivos de layout, os arquivos de menu devem conter o nome do compo
 
 Uma boa prática é *não* incluir a palavra `menu` como prefixo do arquivo, porque ele já se encontra na pasta `menu` do seu projeto e nas referências (R.`menu`.menu_activity_user).
 
-#### 1.2.2.4 Values files
+#### 1.2.2.4 Values
 
-Resource files in the values folder should be __plural__, e.g. `strings.xml`, `styles.xml`, `colors.xml`, `dimens.xml`, `attrs.xml`
+Arquivos da pasta `values` devem estar no __plural__, ex. `strings.xml`, `styles.xml`, `colors.xml`, `dimens.xml`, `attrs.xml`
+
+---
 
 # 2 Code guidelines
 
-## 2.1 Java language rules
+## 2.1 Java
 
-### 2.1.1 Don't ignore exceptions
+### 2.1.1 Não ignore as exceptions
 
-You must never do the following:
+Você **nunca** deverá fazer da seguinte forma:
 
 ```java
 void setServerPort(String value) {
@@ -99,76 +101,111 @@ void setServerPort(String value) {
 }
 ```
 
-_While you may think that your code will never encounter this error condition or that it is not important to handle it, ignoring exceptions like above creates mines in your code for someone else to trip over some day. You must handle every Exception in your code in some principled way. The specific handling varies depending on the case._ - ([Android code style guidelines](https://source.android.com/source/code-style.html))
+_Você pode pensar que o seu código nunca vai estourar exception ou que não é importante trata-la. Ignorando exceções como foi mostrado acima, cria minas em seu código para alguém tropeçar algum dia. Você deve tratar as exceptions com a sua própria peculiaridade. O tratamento específico varia dependendo do caso._ - ([Android code style guidelines](https://source.android.com/source/code-style.html))
 
-See alternatives [here](https://source.android.com/source/code-style.html#dont-ignore-exceptions).
+**Altarnativas que aceitas:**
 
-### 2.1.2 Don't catch generic exception
-
-You should not do this:
-
++ Retorne a exception que o seu método pode retornar em casos de erro
 ```java
-try {
-    someComplicatedIOFunction();        // may throw IOException
-    someComplicatedParsingFunction();   // may throw ParsingException
-    someComplicatedSecurityFunction();  // may throw SecurityException
-    // phew, made it all the way
-} catch (Exception e) {                 // I'll just catch all exceptions
-    handleError();                      // with one generic handler!
+void setServerPort(String value) throws NumberFormatException {
+    this.serverPort = Integer.parseInt(value);
 }
 ```
 
-See the reason why and some alternatives [here](https://source.android.com/source/code-style.html#dont-catch-generic-exception)
++ Retorne a exception que é apropriada para a sua camada de abstração
+```java
+void setServerPort(String value) throws ConfigurationException {
+    try {
+        serverPort = Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+        throw new ConfigurationException("Port " + value + " is not valid.");
+    }
+}
+```
 
-### 2.1.3 Don't use finalizers
++ Trate o erro e substitua por uma solução apropriada no bloco catch
+```java
+/** Set port. If value is not a valid number, 80 is substituted. */
 
-_We don't use finalizers. There are no guarantees as to when a finalizer will be called, or even that it will be called at all. In most cases, you can do what you need from a finalizer with good exception handling. If you absolutely need it, define a `close()` method (or the like) and document exactly when that method needs to be called. See `InputStream` for an example. In this case it is appropriate but not required to print a short log message from the finalizer, as long as it is not expected to flood the logs._ - ([Android code style guidelines](https://source.android.com/source/code-style.html#dont-use-finalizers))
+void setServerPort(String value) {
+    try {
+        serverPort = Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+        serverPort = 80;  // default port for server
+    }
+}
+```
+
+Você pode ver outras soluções alternativas [aqui](https://source.android.com/source/code-style.html#dont-ignore-exceptions).
+
+### 2.1.2 Não trate exceptions como genéricas
+
+Você **não** pode fazer isso (sério, não faça, por favor):
+
+```java
+try {
+    someComplicatedIOFunction();        // IOException
+    someComplicatedParsingFunction();   // ParsingException
+    someComplicatedSecurityFunction();  // SecurityException
+    // phew, made it all the way
+} catch (Exception e) {                 // Aqui capturamos uma exception genérica
+    handleError();                      // com um tratamento genérico!
+}
+```
+
+Veja mais detalhes sobre esse assunto [aqui](https://source.android.com/source/code-style.html#dont-catch-generic-exception).
+
+### 2.1.3 Não use `finally`
+
+_Nós não usamos `finally`. Não há garantias de quando um finalizador será chamado, ou mesmo que ele será chamado em tudo. Na maioria dos casos, você pode fazer o que você precisa de um finalizador com boa manipulação de exceção. Se você **realmente** precisar, defina um método `close()` (ou semelhante) e um comentário dizendo exatamente quando esse método precisa ser chamado._ - ([Android code style guidelines](https://source.android.com/source/code-style.html#dont-use-finalizers))
 
 
-### 2.1.4 Fully qualify imports
+### 2.1.4 Imports
 
-This is bad: `import foo.*;`
+Quando você quiser usar a classe `Bar` do pacote `foo`, há duas maneiras possíveis de importá-lo
 
-This is good: `import foo.Bar;`
+A ruim: `import foo.*;`
++ Potencialmente reduz o número de declarações de importação.
 
-See more info [here](https://source.android.com/source/code-style.html#fully-qualify-imports)
+A boa: `import foo.Bar;`
++ Torna óbvio que as classes são realmente utilizados e o código se torna mais legível para futuras manutenções.
 
-## 2.2 Java style rules
+Use `import foo.Bar;` quando se tratar de código para Android. As únicas exceções que essa regra não se aplica é no uso de bibliotecas do Java (ex. `java.util.*`, `java.io.*`) e para testes unitários (`junit.framework.*`).
 
-### 2.2.1 Fields definition and naming
+## 2.2 Regras da codificação Java
 
-Fields should be defined at the __top of the file__ and they should follow the naming rules listed below.
+### 2.2.1 Definições de atributos e nomes
 
-* Private, non-static field names start with __m__.
-* Private, static field names start with __s__.
-* Other fields start with a lower case letter.
-* Static final fields (constants) are ALL_CAPS_WITH_UNDERSCORES.
+Atributos **devem** ser declarados __no topo da classe__ e eles **devem** seguir as seguintes lista de regras:
 
-Example:
+* Nunca utilizar [Hungarian notation](https://en.wikipedia.org/wiki/Hungarian_notation) - isso é muito feio
+* Atributos `static` ou `final` devem estar TODOS_EM_CAPS_COM_UNDERSCORES
+* Outros atributos devem estar escritos com __lower case__
+* Todos os atributos devem estar no padrão [CamelCase](https://pt.wikipedia.org/wiki/CamelCase)
+
+Exemplo:
 
 ```java
 public class MyClass {
     public static final int SOME_CONSTANT = 42;
     public int publicField;
-    private static MyClass sSingleton;
-    int mPackagePrivate;
-    private int mPrivate;
-    protected int mProtected;
+    private static MyClass MY_CLASS;
+    int packagePrivate;
 }
 ```
 
-### 2.2.3 Treat acronyms as words
+### 2.2.3 Tratar siglas como palavras
 
-| Good           | Bad            |
-| -------------- | -------------- |
+| Bom :+1:         | Ruim :-1:        |
+| ---------------- | ---------------- |
 | `XmlHttpRequest` | `XMLHTTPRequest` |
 | `getCustomerId`  | `getCustomerID`  |
 | `String url`     | `String URL`     |
 | `long id`        | `long ID`        |
 
-### 2.2.4 Use spaces for indentation
+### 2.2.4 Use TAB para indentação
 
-Use __4 space__ indents for blocks:
+Use __TAB__ para indentação de blocos:
 
 ```java
 if (x == 1) {
@@ -176,155 +213,134 @@ if (x == 1) {
 }
 ```
 
-Use __8 space__ indents for line wraps:
+### 2.2.5 Sobre user `{ }`
 
-```java
-Instrument i =
-        someLongExpression(that, wouldNotFit, on, one, line);
-```
+> Lembre-se sempre de verificar se há espaços entre os parenteses, chaves e comandos
 
-### 2.2.5 Use standard brace style
+Se a condição e o corpo cabem em apenas uma linha, _não utilize chaves_.
 
-Braces go on the same line as the code before them.
-
-```java
-class MyClass {
-    int func() {
-        if (something) {
-            // ...
-        } else if (somethingElse) {
-            // ...
-        } else {
-            // ...
-        }
-    }
-}
-```
-
-Braces around the statements are required unless the condition and the body fit on one line.
-
-If the condition and the body fit on one line and that line is shorter than the max line length, then braces are not required, e.g.
-
+Isso é __bom__:
 ```java
 if (condition) body();
 ```
 
-This is __bad__:
-
+Isso é __ruim__:
 ```java
 if (condition)
-    body();  // bad!
+    body();  // nooooooo!!
 ```
 
 ### 2.2.6 Annotations
 
-#### 2.2.6.1 Annotations practices
+#### 2.2.6.1 Práticas de `Annotations`
 
-According to the Android code style guide, the standard practices for some of the predefined annotations in Java are:
+De acordo com o guia de estilo de código do Android,
+According to the Android code style guide, as práticas padrão para algumas das anotações predefinidos em Java são:
 
-* `@Override`: The @Override annotation __must be used__ whenever a method overrides the declaration or implementation from a super-class. For example, if you use the @inheritdocs Javadoc tag, and derive from a class (not an interface), you must also annotate that the method @Overrides the parent class's method.
+* `@Deprecated`: A anotação @Deprecated __deve ser usada__ sempre que um método ou atribudo está descontinuado. Você também deverá criar um comentário sobre o método anotado informando qual método substitui o mesmo. Lembrando que o método anotado com `@Deprecated` deve continuar funcionando e desligado em futuras manutenções.
 
-* `@SuppressWarnings`: The @SuppressWarnings annotation should only be used under circumstances where it is impossible to eliminate a warning. If a warning passes this "impossible to eliminate" test, the @SuppressWarnings annotation must be used, so as to ensure that all warnings reflect actual problems in the code.
+* `@Override`: A anotação @Override __deve ser usada__ sempre que um método substitui a declaração ou a aplicação de uma super-classe.
 
-More information about annotation guidelines can be found [here](http://source.android.com/source/code-style.html#use-standard-java-annotations).
+* `@SuppressWarnings`: A anotação @SuppressWarnings só deve ser usado em circunstâncias em que é impossível de eliminar um aviso. Se um aviso este passa a ser "impossível de eliminar" de teste, a anotação @SuppressWarnings deve ser usado, de modo a assegurar que todos os avisos refletir problemas reais do código.
 
-#### 2.2.6.2 Annotations style
+Mais informações sobre `Annotations` podem ser encontradas [aqui](http://source.android.com/source/code-style.html#use-standard-java-annotations).
 
-__Classes, Methods and Constructors__
+#### 2.2.6.2 Estilos de Annotations
 
-When annotations are applied to a class, method, or constructor, they are listed after the documentation block and should appear as __one annotation per line__ .
+__Classes, Métodos e Contrutores__
+
+Quando as anotações são aplicadas a uma classe, método ou construtor, eles são listados após o bloco de documentação e deve aparecer como __uma anotação por linha__.
 
 ```java
-/* This is the documentation block about the class */
+/* Exemplo de bloco para classe */
 @AnnotationA
 @AnnotationB
 public class MyAnnotatedClass { }
 ```
 
-__Fields__
+__Atributos__
 
-Annotations applying to fields should be listed __on the same line__, unless the line reaches the maximum line length.
+Anotações aplicadas em atributos devem estar listados na __mesma linha__.
 
 ```java
-@Nullable @Mock DataManager mDataManager;
+@Nullable @Mock DataManager dataManager;
 ```
 
-### 2.2.7 Limit variable scope
+### 2.2.7 Limitar o escopo de variáveis
 
-_The scope of local variables should be kept to a minimum (Effective Java Item 29). By doing so, you increase the readability and maintainability of your code and reduce the likelihood of error. Each variable should be declared in the innermost block that encloses all uses of the variable._
+_O escopo de variáveis ​​locais devem ser mantidos a um mínimo (Effective Java Item 29). Ao fazer isso, você aumenta a legibilidade e manutenção de seu código e reduzir a probabilidade de erro. Cada variável deve ser declarada no bloco mais interno que inclui todos os usos da variável._
 
-_Local variables should be declared at the point they are first used. Nearly every local variable declaration should contain an initializer. If you don't yet have enough information to initialize a variable sensibly, you should postpone the declaration until you do._ - ([Android code style guidelines](https://source.android.com/source/code-style.html#limit-variable-scope))
+_As variáveis ​​locais devem ser declaradas no momento da sua primeira utilização. Quase todas as declarações de variáveis locais devem conter um inicializador. Se você ainda não tem informações suficientes para inicializar uma variável de forma sensata, você deve adiar a declaração até que tenha as informações necessárias para isso._ - ([Android code style guidelines](https://source.android.com/source/code-style.html#limit-variable-scope))
 
-### 2.2.8 Order import statements
+### 2.2.8 Outro padrão de import
 
-If you are using an IDE such as Android Studio, you don't have to worry about this because your IDE is already obeying these rules. If not, have a look below.
+Se você estiver usando uma IDE como o Android Studio, você não precisa se preocupar com isso porque a sua IDE já está obedecendo estas regras. Se não, dê uma olhada abaixo.
 
-The ordering of import statements is:
+A ordenação das declarações de importação é:
 
 1. Android imports
-2. Imports from third parties (com, junit, net, org)
-3. java and javax
-4. Same project imports
+2. Imports de terceiros (com, junit, net, org)
+3. java e javax
+4. Imports do mesmo projeto
 
-To exactly match the IDE settings, the imports should be:
+Para coincidir exatamente com as configurações da IDE, as importações devem ser:
 
-* Alphabetically ordered within each grouping, with capital letters before lower case letters (e.g. Z before a).
-* There should be a blank line between each major grouping (android, com, junit, net, org, java, javax).
+* Ordenados alfabeticamente dentro de cada grupo, com letras maiúsculas antes de letras minúsculas (por exemplo, Z antes de a).
+* Deve haver uma linha em branco entre cada grande agrupamento (android, com, JUnit, net, org, java, javax).
 
-More info [here](https://source.android.com/source/code-style.html#limit-variable-scope)
+Mais informações [aqui](https://source.android.com/source/code-style.html#limit-variable-scope)
 
-### 2.2.9 Logging guidelines
+### 2.2.9 Log
 
-Use the logging methods provided by the `Log` class to print out error messages or other information that may be useful for developers to identify issues:
+Use os métodos de registro fornecidos pela classe `Log` para imprimir mensagens de erro ou outras informações que possam ser úteis para os desenvolvedores identificarem os problemas:
 
 * `Log.v(String tag, String msg)` (verbose)
 * `Log.d(String tag, String msg)` (debug)
-* `Log.i(String tag, String msg)` (information)
-* `Log.w(String tag, String msg)` (warning)
-* `Log.e(String tag, String msg)` (error)
+* `Log.i(String tag, String msg)` (informações)
+* `Log.w(String tag, String msg)` (alertas)
+* `Log.e(String tag, String msg)` (erros)
 
-As a general rule, we use the class name as tag and we define it as a `static final` field at the top of the file. For example:
+Como regra geral, use o nome da classe como tag e definimos como um campo `static final` na parte superior do arquivo. Por exemplo:
 
 ```java
 public class MyClass {
     private static final String TAG = MyClass.class.getSimpleName();
 
     public myMethod() {
-        Log.e(TAG, "My error message");
+        Log.e(TAG, "oh no, a wild error appears");
     }
 }
 ```
 
-VERBOSE and DEBUG logs __must__ be disabled on release builds. It is also recommended to disable INFORMATION, WARNING and ERROR logs but you may want to keep them enabled if you think they may be useful to identify issues on release builds. If you decide to leave them enabled, you have to make sure that they are not leaking private information such as email addresses, user ids, etc.
+VERBOSE e DEBUG logs __devem__ estar desabilitador nas builds de produção. Também é recomendado desativar INFORMATION, WARNING e logs de ERROR, mas você pode querer mantê-los ativado se você acha que eles podem ser úteis para identificar problemas em builds de produção. Se você decidir deixá-los habilitado, você tem que ter certeza que eles não estão vazando informações privadas, como endereços de e-mail, IDs de usuário, etc.
 
-To only show logs on debug builds:
+Para mostrar somente logs em builds de DEBUG:
 
 ```java
 if (BuildConfig.DEBUG) Log.d(TAG, "The value of x is " + x);
 ```
 
-### 2.2.10 Class member ordering
+### 2.2.10 Ordenação do `.class`
 
-There is no single correct solution for this but using a __logical__ and __consistent__ order will improve code learnability and readability. It is recommendable to use the following order:
+Não há uma solução correta única para isso, mas usando uma ordem __lógica__ e __consistente__ irá melhorar a capacidade de aprendizado de código e legibilidade. É recomendado usar a seguinte ordem:
 
-1. Constants
-2. Fields
-3. Constructors
-4. Override methods and callbacks (public or private)
-5. Public methods
-6. Private methods
-7. Inner classes or interfaces
+1. Atributos
+2. Construtores
+3. Métodos anotados com `@Override` e callbacks (public ou private)
+4. Métodos públicos
+5. Métodos privados
+6. Métodos de interfaces
 
-Example:
+Exemplo:
 
 ```java
 public class MainActivity extends Activity {
 
-	private String mTitle;
-    private TextView mTextViewTitle;
+	  private String title;
+    private TextView titleTextView;
 
     public void setTitle(String title) {
-    	mTitle = title;
+    	this.title = title;
     }
 
     @Override
@@ -336,19 +352,15 @@ public class MainActivity extends Activity {
         ...
     }
 
-    static class AnInnerClass {
-
-    }
-
 }
 ```
 
-If your class is extending an __Android component__ such as an Activity or a Fragment, it is a good practice to order the override methods so that they __match the component's lifecycle__. For example, if you have an Activity that implements `onCreate()`, `onDestroy()`, `onPause()` and `onResume()`, then the correct order is:
+Se sua classe está herdando de um __componente do Android__, como uma `Activity` ou `Fragment`, é uma boa prática ordenar os métodos de substituição para que eles siguam o __ciclo de vida do componente__. Por exemplo, se você tem uma `Activity` que implementa `onCreate()`, `onDestroy()`, `onPause()` e `onResume()`, a forma correta de ordenar será:
 
 ```java
 public class MainActivity extends Activity {
 
-	//Order matches Activity lifecycle
+	  // Ordenando de acordo com o ciclo de vida da Activity
     @Override
     public void onCreate() {}
 
