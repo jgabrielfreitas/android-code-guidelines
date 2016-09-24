@@ -521,139 +521,130 @@ loadPicture(context,
             clickListener,
             "Title of the picture");
 ```
-> De preferência alinha os parâmetros também
+> De preferência alinha os parâmetros também.
 
-## 2.3 XML style rules
+## 2.3 XML
 
-### 2.3.1 Use self closing tags
+### 2.3.1 Feche as próprias tags
 
-When an XML element doesn't have any contents, you __must__ use self closing tags.
+Quando o elemento do XML não possui nenhum componente interno, você __deve__ fecha-lo.
 
-This is good:
+Forma correta:
 
 ```xml
 <TextView
-	android:id="@+id/text_view_profile"
+	android:id="@+id/profileTextView"
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content" />
 ```
 
-This is __bad__ :
+Forma __errada__ :
 
 ```xml
-<!-- Don\'t do this! -->
+<!-- Sério, isso é muito feio -->
 <TextView
-    android:id="@+id/text_view_profile"
+    android:id="@+id/profileTextView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
 </TextView>
 ```
 
 
-### 2.3.2 Resources naming
+### 2.3.2 Nomeando elementos de Layout
 
-Resource IDs and names are written in __lowercase_underscore__.
+Os IDs dos elementos devem ser escritos utilizando __camelCase__.
 
-#### 2.3.2.1 ID naming
+#### 2.3.2.1 Nomeando...
 
-IDs should be prefixed with the name of the element in lowercase underscore. For example:
+Os IDs devem conter como sufixo o nome do componente.
+Por exemplo:
 
 
-| Element            | Prefix            |
-| -----------------  | ----------------- |
-| `TextView`           | `text_`             |
-| `ImageView`          | `image_`            |
-| `Button`             | `button_`           |
-| `Menu`               | `menu_`             |
+| Elemento             | Sufixo              |
+| -------------------  | ------------------- |
+| `TextView`           | `TextView`          |
+| `ImageView`          | `ImageView`         |
+| `Button`             | `Button`            |
+| `Menu`               | ---                 |
 
-Image view example:
+Exemplo de ImageView:
 
 ```xml
 <ImageView
-    android:id="@+id/image_profile"
+    android:id="@+id/profileImageView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" />
 ```
+> Utilizar o nome do componente como sufixo ou prefixo, é extremamente questionável.
+Porém, utilizando o tipo do componente no ID nos trás problemas no futuro.
+Ex. O seu projeto cresceu! Quando você quiser mapear um botão, estando todos os botões do projeto com `button_`,
+você terá uma lista com 68468 IDs que iniciam com `button_`.
+Levando isso em conta, adotamos esse modelo.
 
-Menu example:
+Exemplo de menu:
 
 ```xml
 <menu>
 	<item
-        android:id="@+id/menu_done"
+        android:id="@+id/done"
         android:title="Done" />
 </menu>
 ```
 
 #### 2.3.2.2 Strings
 
-String names start with a prefix that identifies the section they belong to. For example `registration_email_hint` or `registration_name_hint`. If a string __doesn't belong__ to any section, then you should follow the rules below:
+Nomes de Strings começam com um prefixo que identifica a seção a que pertencem. Por exemplo `registration_email_hint` ou `registration_name_hint`. Se uma string não pertence a qualquer seção, então você deve seguir as seguintes regras:
 
 
-| Prefix             | Description                           |
-| -----------------  | --------------------------------------|
-| `error_`             | An error message                      |
-| `msg_`               | A regular information message         |
-| `title_`             | A title, i.e. a dialog title          |
-| `action_`            | An action such as "Save" or "Create"  |
+| Prefixo              | Descrição                             |
+| -------------------  | --------------------------------------|
+| `error_`             | Erro da mensagem                      |
+| `msg_`               | Mensagem normal                       |
+| `title_`             | Título de um dialog, por exemplo      |
+| `action_`            | Ação "Salvar", "Voltar", por exemplo  |
 
 
 
-#### 2.3.2.3 Styles and Themes
+#### 2.3.2.3 Styles e Themes
 
-Unless the rest of resources, style names are written in __UpperCamelCase__.
+A menos que o restante dos `resources`, os nomes de `styles` são escritos em __UpperCamelCase__.
 
-### 2.3.3 Attributes ordering
+### 2.3.3 Ordenando atributos
 
-As a general rule you should try to group similar attributes together. A good way of ordering the most common attributes is:
+Como regra geral, você deve tentar grupo atributos semelhantes juntos. Uma boa maneira de ordenar os atributos mais comuns é:
 
 1. View Id
 2. Style
-3. Layout width and layout height
-4. Other layout attributes, sorted alphabetically
-5. Remaining attributes, sorted alphabetically
+3. Layout width e layout height
+4. Outros atributos do layout, ordenados por ordem alfabética
+5. Renomeando os atributos, ordenados por ordem alfabética
 
-## 2.4 Tests style rules
+## 2.4 Tests
 
-### 2.4.1 Unit tests
+### 2.4.1 Testes unitários
 
-Test classes should match the name of the class the tests are targeting, followed by `Test`. For example, if we create a test class that contains tests for the `DatabaseHelper`, we should name it `DatabaseHelperTest`.
+As classes de teste deve corresponder ao nome da classe dos testes que são alvo, seguido de `Test`. Por exemplo, se criar uma classe de teste que contém os testes para o `DatabaseHelper`, devemos chamar de `DatabaseHelperTest`.
 
-Test methods are annotated with `@Test` and should generally start with the name of the method that is being tested, followed by a precondition and/or expected behaviour.
+
+Os métodos de teste são anotados com `@Test` e geralmente devem começar com o nome do método que está a ser testado, seguido de uma pré-condição e / ou o comportamento esperado.
 
 * Template: `@Test void methodNamePreconditionExpectedBehaviour()`
-* Example: `@Test void signInWithEmptyEmailFails()`
+* Exemplo : `@Test void signInWithEmptyEmailFails()`
 
-Precondition and/or expected behaviour may not always be required if the test is clear enough without them.
+Condição prévias e/ou comportamentos esperados nem sempre pode ser necessária se o teste é suficientemente clara sem eles.
 
-Sometimes a class may contain a large amount of methods, that at the same time require several tests for each method. In this case, it's recommendable to split up the test class into multiple ones. For example, if the `DataManager` contains a lot of methods we may want to divide it into `DataManagerSignInTest`, `DataManagerLoadUsersTest`, etc. Generally you will be able to see what tests belong together because they have common [test fixtures](https://en.wikipedia.org/wiki/Test_fixture).
+As vezes, uma classe pode conter uma grande quantidade de métodos, que, ao mesmo tempo requerem vários testes para cada método. Neste caso, é recomendável dividir a classe de teste em várias classes de testes. Por exemplo, se o `DataManager` contém uma grande quantidade de métodos a gente pode querer dividi-lo em `DataManagerSignInTest`, `DataManagerLoadUsersTest`, etc..
+Geralmente você vai ser capaz de ver o que os testes que pertencem um ao outro, porque eles têm dispositivos de [teste comuns](https://en.wikipedia.org/wiki/Test_fixture).
 
-### 2.4.2 Espresso tests
+### 2.4.2 Usando Espresso
 
-Every Espresso test class usually targets an Activity, therefore the name should match the name of the targeted Activity followed by `Test`, e.g. `SignInActivityTest`
+Cada classe de teste [Espresso](https://developer.android.com/training/testing/ui-testing/espresso-testing.html) normalmente tem como alvo uma `Activity`, portanto, o nome deve corresponder ao nome da `Activity` alvo seguido de teste, por exemplo, `SignInActivityTest`.
 
-When using the Espresso API it is a common practice to place chained methods in new lines.
+Ao usar a API do `Espresso` é uma prática comum colocar métodos encadeados em novas linhas.
 
 ```java
 onView(withId(R.id.view))
         .perform(scrollTo())
         .check(matches(isDisplayed()))
 ```
-
-# License
-
-```
-Copyright 2015 Ribot Ltd.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-```
+---
