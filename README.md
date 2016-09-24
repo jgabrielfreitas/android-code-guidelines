@@ -1,6 +1,6 @@
-# 1. Project guidelines
+# 1. Guidelines para os projetos Android
 
-## 1.1 Project structure
+## 1.1 Estruturas do projeto
 
 Novos projetos devem seguir a estrutura do projeto Gradle Android que está definido no guia do [usuário do plugin Gradle Android](http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Project-Structure). O projeto [ribot Boilerplate](https://github.com/ribot/android-boilerplate) é uma boa referência para começar.
 
