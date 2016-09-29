@@ -10,7 +10,7 @@ Novos projetos devem seguir a estrutura do projeto Gradle Android que está defi
 Nomes de classes devem ser escritas no formato [UpperCamelCase](http://en.wikipedia.org/wiki/CamelCase).
 
 Para classes que herdam (`extends`) de um componente do Android, deve terminar com o nome do componente;
-for example: `SignInActivity`, `SignInFragment`, `ImageUploaderService`, `ChangePasswordDialog` ...
+Por exemplo: `SignInActivity`, `SignInFragment`, `ImageUploaderService`, `ChangePasswordDialog` ...
 
 ### 1.2.2 Resources
 
@@ -234,8 +234,7 @@ if (condition)
 
 #### 2.2.6.1 Práticas de `Annotations`
 
-De acordo com o guia de estilo de código do Android,
-According to the Android code style guide, as práticas padrão para algumas das anotações predefinidos em Java são:
+De acordo com o guia de estilo de código do Android, as práticas padrão para algumas das anotações predefinidos em Java são:
 
 * `@Deprecated`: A anotação @Deprecated __deve ser usada__ sempre que um método ou atribudo está descontinuado. Você também deverá criar um comentário sobre o método anotado informando qual método substitui o mesmo. Lembrando que o método anotado com `@Deprecated` deve continuar funcionando e desligado em futuras manutenções.
 
